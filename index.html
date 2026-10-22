@@ -363,6 +363,21 @@ body{overscroll-behavior-y:none}
 .kbtn:hover{color:#fff;border-color:rgba(255,255,255,.5)}
 @media(max-width:900px){.kbtn{display:none}}
 @media(prefers-reduced-motion:reduce){.js .rvl{opacity:1;transform:none;transition:none}}
+
+@property --a{syntax:'<angle>';initial-value:0deg;inherits:false}
+@keyframes trail{to{--a:360deg}}
+#form{position:relative;border-radius:16px}
+#form::after{content:"";position:absolute;inset:-1px;border-radius:inherit;padding:1px;pointer-events:none;background:conic-gradient(from var(--a),transparent 0 78%,var(--acc) 100%);-webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);-webkit-mask-composite:xor;mask:linear-gradient(#000 0 0) content-box exclude,linear-gradient(#000 0 0);animation:trail 7s linear infinite}
+.tr{display:inline-flex;overflow:hidden;vertical-align:bottom;line-height:1.25}
+.tr i{display:inline-block;font-style:normal;white-space:pre;position:relative;transition:transform .45s cubic-bezier(.6,0,.2,1);transition-delay:calc(var(--i)*.03s)}
+.tr i::after{content:attr(data-c);position:absolute;left:0;top:100%}
+a:hover>.tr i,button:hover>.tr i,.btn:hover .tr i,.nav a:hover .tr i{transform:translateY(-100%)}
+.kbtn .tr{margin-right:.45em}
+.pblur{position:fixed;left:0;right:0;bottom:0;height:72px;z-index:70;pointer-events:none}
+.pblur::before,.pblur::after{content:"";position:absolute;inset:0}
+.pblur::before{backdrop-filter:blur(3px);-webkit-backdrop-filter:blur(3px);-webkit-mask:linear-gradient(transparent,#000 60%);mask:linear-gradient(transparent,#000 60%)}
+.pblur::after{backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);-webkit-mask:linear-gradient(transparent 40%,#000);mask:linear-gradient(transparent 40%,#000)}
+@media(prefers-reduced-motion:reduce){#form::after{animation:none;opacity:0}.tr i{transition:none}}
 </style>
 </head>
 <body>
@@ -370,6 +385,7 @@ body{overscroll-behavior-y:none}
 <div class="cur" id="cur" aria-hidden="true"></div>
 <div class="pbar" id="pbar" aria-hidden="true"></div>
 <div class="grain" aria-hidden="true"></div>
+<div class="pblur" aria-hidden="true"></div>
 <div class="cmdk" id="cmdk" role="dialog" aria-modal="true" aria-label="Jump to section"><div class="cmdk-b"><input id="cmdq" type="text" placeholder="Jump to a section or action…" autocomplete="off" aria-label="Search"><ul id="cmdl" role="listbox"></ul><div class="cmdk-h">Enter to go · Esc to close</div></div></div>
 
 
@@ -1128,6 +1144,23 @@ let setScope=()=>{};
   q.addEventListener('keydown',e=>{if(e.key==='ArrowDown'){e.preventDefault();sel=Math.min(cur.length-1,sel+1);draw()}else if(e.key==='ArrowUp'){e.preventDefault();sel=Math.max(0,sel-1);draw()}else if(e.key==='Enter'){e.preventDefault();go(sel)}});
   addEventListener('keydown',e=>{if((e.ctrlKey||e.metaKey)&&e.key.toLowerCase()==='k'){e.preventDefault();box.classList.contains('open')?close():open()}else if(e.key==='Escape'&&box.classList.contains('open'))close()});
   document.getElementById('kbtn').addEventListener('click',open);
+})();
+
+/* ---------- Motion Primitives ports: text roll + tilt ---------- */
+(function(){
+  const rm=matchMedia('(prefers-reduced-motion:reduce)').matches, fine=matchMedia('(pointer:fine)').matches;
+  if(rm)return;
+  document.querySelectorAll('.nav a, .btn, .kbtn').forEach(el=>{
+    if(el.children.length&&!el.querySelector('span#kk'))return;
+    const n=[...el.childNodes].find(x=>x.nodeType===3&&x.textContent.trim());if(!n)return;
+    const s=n.textContent.trim(),w=document.createElement('span');w.className='tr';w.setAttribute('aria-hidden','true');
+    w.innerHTML=[...s].map((c,i)=>`<i style="--i:${i}" data-c="${c===' '?'\u00a0':c}">${c===' '?'\u00a0':c}</i>`).join('');
+    el.setAttribute('aria-label',el.getAttribute('aria-label')||s);n.replaceWith(w);
+  });
+  if(fine)document.querySelectorAll('.panel,.cinfo').forEach(c=>{
+    c.addEventListener('pointermove',e=>{const r=c.getBoundingClientRect(),x=(e.clientX-r.left)/r.width-.5,y=(e.clientY-r.top)/r.height-.5;c.style.transition='transform .15s';c.style.transform=`perspective(900px) rotateX(${(-y*5).toFixed(2)}deg) rotateY(${(x*6).toFixed(2)}deg)`});
+    c.addEventListener('pointerleave',()=>{c.style.transition='transform .5s';c.style.transform=''});
+  });
 })();
 </script>
 </body>
