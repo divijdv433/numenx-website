@@ -580,7 +580,7 @@ document.querySelectorAll('a[href^="#"]').forEach(a=>a.addEventListener('click',
     const base=+wm.dataset.base||100,wh=wm.offsetHeight||base*.9,Rd=R/d,cyd=cy/d;
     const e1=ease(p/.5),e2=ease((p-.5)/.22);
     const sc=.2+.6*e1+.2*e2;
-    const yTop=cyd-Rd-wh*.8*.46,yFin=cyd-h*.02;
+    const yTop=cyd-Rd-wh*.8*.46,yFin=cyd-h*.19;
     const yc=cyd+(yTop-cyd)*e1+(yFin-yTop)*e2;
     const tr=`translate(-50%,${yc-wh/2}px) scale(${sc})`,bx=(p*85)+'% 0';
     wm.style.transform=tr;wm.style.opacity=p>.015?1:0;wm.firstElementChild.style.backgroundPosition='0 0,'+bx;
