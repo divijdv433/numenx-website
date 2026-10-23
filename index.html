@@ -277,6 +277,31 @@ main,footer{position:relative;z-index:1}
 .hero,.light,.statement,.sec.light,.dark,.contact,footer{background:transparent!important}
 .lavband{background:linear-gradient(180deg,rgba(59,10,107,.26),rgba(59,10,107,.16))!important}
 .mocha{background:rgba(59,10,107,.80)!important}
+
+/* constellation */
+.const{margin-top:clamp(28px,4vw,56px)}
+.cs{position:relative;height:540px}
+.cs svg{position:absolute;inset:0;width:100%;height:100%;overflow:visible}
+.cs line{stroke:rgba(150,120,255,.28);stroke-width:1;vector-effect:non-scaling-stroke;transition:stroke .4s}
+.cs line.on{stroke:rgba(0,229,255,.85)}
+.nd{position:absolute;width:48px;height:48px;transform:translate(-50%,-50%);background:none;border:0;padding:0;cursor:pointer;color:#fff;-webkit-tap-highlight-color:transparent}
+.nd i{position:absolute;left:50%;top:50%;width:9px;height:9px;margin:-4.5px 0 0 -4.5px;border-radius:50%;background:#fff;box-shadow:0 0 10px 2px rgba(170,130,255,.85);transition:transform .3s,background .3s,box-shadow .3s}
+.nd:nth-of-type(3n) i{background:#bff7ff;box-shadow:0 0 10px 2px rgba(0,229,255,.8)}
+.nd:nth-of-type(3n+1) i{background:#d6c4ff}
+.nd b{position:absolute;top:50%;left:calc(50% + 13px);transform:translateY(-50%);white-space:nowrap;font:600 13px/1 var(--sans);color:rgba(255,255,255,.72);transition:color .3s}
+.nd.l b{left:auto;right:calc(50% + 13px)}
+.nd:hover i,.nd:focus-visible i{transform:scale(1.5)}
+.nd:focus-visible{outline:2px solid var(--cyan);outline-offset:-8px;border-radius:50%}
+.nd.on i{background:var(--cyan);transform:scale(1.7);box-shadow:0 0 0 6px rgba(0,229,255,.18),0 0 26px 6px rgba(0,229,255,.7)}
+.nd.on b{color:#fff}
+.cp{display:grid;grid-template-columns:auto 1fr auto;gap:clamp(16px,3vw,40px);align-items:center;margin-top:8px;padding:clamp(20px,2.4vw,30px) clamp(20px,3vw,40px);border-radius:28px;background:var(--amethyst);min-height:150px}
+.cn{font:italic 500 clamp(30px,4vw,48px)/1 var(--serif);color:var(--cyan)}
+.ct h3{font-size:clamp(22px,2.4vw,32px);margin-bottom:8px}
+.ct p{color:rgba(255,255,255,.8);max-width:60ch}
+.cb{display:flex;gap:8px}
+.cb button{width:44px;height:44px;border-radius:50%;border:1px solid rgba(0,229,255,.5);background:transparent;color:#fff;font-size:18px;cursor:pointer;transition:background .25s,color .25s}
+.cb button:hover{background:var(--cyan);color:var(--jet)}
+@media(max-width:700px){.cs{height:min(118vw,500px)}.nd b{font-size:12px}.cp{grid-template-columns:auto 1fr;min-height:0}.cb{grid-column:1/-1;justify-content:flex-end}}
 </style>
 </head>
 <body>
@@ -323,7 +348,14 @@ main,footer{position:relative;z-index:1}
 <section class="sec light" id="capabilities" data-th="light">
   <div class="wrap">
     <div class="sec-h"><span class="eyebrow rv">What we do</span><h2 data-hw>Full-Stack Engineering, From Silicon to System</h2><p class="rv">Fifteen services, one team. Pick the part you need or hand us the whole product.</p></div>
-    <div class="grid" id="cards"></div>
+    <div class="const rv">
+      <div class="cs" id="cs" role="group" aria-label="Fifteen services, shown as a constellation"><svg id="cl" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true"></svg></div>
+      <div class="cp" aria-live="polite">
+        <span class="cn" id="cn">01</span>
+        <div class="ct"><h3 id="ch"></h3><p id="cd"></p></div>
+        <div class="cb"><button type="button" id="cprev" aria-label="Previous service">&#8592;</button><button type="button" id="cnext" aria-label="Next service">&#8594;</button></div>
+      </div>
+    </div>
   </div>
 </section>
 
@@ -472,7 +504,28 @@ const expertise=['Automated Test Equipment','End-to-End Solutions','Battle-Ready
 const stack=[['RTL and FPGA',['VHDL','Verilog','SystemVerilog','FPGA','Xilinx','Intel FPGA','Altera','Quartus','Vivado']],['Embedded and software',['Embedded C','C++','Python','ARM','STM32','Microchip','ESP32','FreeRTOS','Linux','Git']],['Interfaces',['Ethernet','CAN','SPI','I2C','UART','USB','PCIe']],['Design and analysis',['KiCad','Altium','Cadence','MATLAB']]];
 const faqs=[['What kinds of projects does NumenX take on?','Embedded systems, FPGA design, firmware, hardware and PCB development, signal processing, ATE, defense electronics and full product engineering, from prototype to production.'],['Do you work with startups as well as large organisations?','Yes. We work with startups, enterprises, research organisations and government agencies, scoping each engagement to the application and reliability requirements.'],['Can you handle a project end to end?','Yes. We deliver architecture, hardware, firmware, FPGA, testing, validation and manufacturing support as a single accountable team.'],['How do we get started?','Send a project inquiry through the contact form with your requirements, budget and timeline. We typically respond within 1 to 2 business days.']];
 
-$('cards').innerHTML=services.map((s,i)=>`<article class="card rv" style="--d:${(i%3)*.08}s"><span class="n">${String(i+1).padStart(2,'0')}</span><div><h3>${s[0]}</h3><p>${s[1]}</p></div></article>`).join('');
+const sh=['Embedded','FPGA','Firmware','Hardware','PCB','Signal processing','Product','Test equipment','Defense','Validation','Reverse eng.','Consultancy','R&D','Prototypes','Integration'];
+(function(){
+  const cs=document.getElementById('cs'),cl=document.getElementById('cl');
+  const land=[[8,28],[19,68],[22,14],[33,44],[36,84],[46,20],[50,62],[61,38],[63,86],[73,14],[76,58],[86,30],[90,80],[56,6],[12,92]];
+  const port=[];{const xl=[16,24,12,28,18,26,14,24],xr=[80,72,86,74,84,70,78];for(let i=0;i<15;i++)port.push([i%2?xr[(i-1)/2]:xl[i/2],5+i*(90/14)])}
+  const edges=[];for(let i=0;i<14;i++)edges.push([i,i+1]);for(let i=0;i<13;i+=2)edges.push([i,i+2]);edges.push([3,7],[7,11],[5,9]);
+  const mq=matchMedia('(max-width:700px)');let act=0,nodes=[],lines=[];
+  function build(){
+    cs.querySelectorAll('.nd').forEach(n=>n.remove());cl.innerHTML='';
+    const P=mq.matches?port:land;
+    lines=edges.map(e=>{const l=document.createElementNS('http://www.w3.org/2000/svg','line');l.setAttribute('x1',P[e[0]][0]);l.setAttribute('y1',P[e[0]][1]);l.setAttribute('x2',P[e[1]][0]);l.setAttribute('y2',P[e[1]][1]);cl.appendChild(l);return l});
+    nodes=P.map((p,i)=>{const b=document.createElement('button');b.type='button';b.className='nd'+(p[0]>(mq.matches?50:55)?' l':'');b.style.left=p[0]+'%';b.style.top=p[1]+'%';b.setAttribute('aria-label',(i+1)+'. '+services[i][0]);b.innerHTML='<i></i><b>'+sh[i]+'</b>';b.addEventListener('click',()=>set(i));cs.appendChild(b);return b});
+    set(act,true)}
+  function set(i,quiet){act=(i+15)%15;
+    nodes.forEach((n,k)=>{n.classList.toggle('on',k===act);n.setAttribute('aria-pressed',k===act)});
+    lines.forEach((l,k)=>l.classList.toggle('on',edges[k][0]===act||edges[k][1]===act));
+    document.getElementById('cn').textContent=String(act+1).padStart(2,'0');
+    document.getElementById('ch').textContent=services[act][0];document.getElementById('cd').textContent=services[act][1]}
+  document.getElementById('cprev').onclick=()=>set(act-1);document.getElementById('cnext').onclick=()=>set(act+1);
+  cs.addEventListener('keydown',e=>{if(e.key==='ArrowRight'||e.key==='ArrowDown'){set(act+1);nodes[act].focus();e.preventDefault()}if(e.key==='ArrowLeft'||e.key==='ArrowUp'){set(act-1);nodes[act].focus();e.preventDefault()}});
+  mq.addEventListener?mq.addEventListener('change',build):mq.addListener(build);build();
+})();
 $('steps').insertAdjacentHTML('beforeend',steps.map((s,i)=>`<div class="st rv"><span class="n">${String(i+1).padStart(2,'0')}</span><h3>${s[0]}</h3><p>${s[1]}</p></div>`).join(''));
 $('whys').innerHTML=whys.map((w,i)=>`<div class="rv" style="--d:${(i%2)*.08}s"><b>${w[0]}</b><span>${w[1]}</span></div>`).join('');
 $('inds').innerHTML=inds.map(x=>`<span>${x}</span>`).join('');
