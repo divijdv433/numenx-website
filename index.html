@@ -302,6 +302,11 @@ main,footer{position:relative;z-index:1}
 .cb button{width:44px;height:44px;border-radius:50%;border:1px solid rgba(0,229,255,.5);background:transparent;color:#fff;font-size:18px;cursor:pointer;transition:background .25s,color .25s}
 .cb button:hover{background:var(--cyan);color:var(--jet)}
 @media(max-width:700px){.cs{height:min(118vw,500px)}.nd b{font-size:12px}.cp{grid-template-columns:auto 1fr;min-height:0}.cb{grid-column:1/-1;justify-content:flex-end}}
+
+@keyframes tw{0%,100%{opacity:.3}50%{opacity:1}}
+.nd i{animation:tw var(--td,3s) ease-in-out var(--dl,0s) infinite}
+.nd.on i,.nd:hover i{animation:none;opacity:1}
+@media(prefers-reduced-motion:reduce){.nd i{animation:none}}
 </style>
 </head>
 <body>
@@ -504,18 +509,18 @@ const expertise=['Automated Test Equipment','End-to-End Solutions','Battle-Ready
 const stack=[['RTL and FPGA',['VHDL','Verilog','SystemVerilog','FPGA','Xilinx','Intel FPGA','Altera','Quartus','Vivado']],['Embedded and software',['Embedded C','C++','Python','ARM','STM32','Microchip','ESP32','FreeRTOS','Linux','Git']],['Interfaces',['Ethernet','CAN','SPI','I2C','UART','USB','PCIe']],['Design and analysis',['KiCad','Altium','Cadence','MATLAB']]];
 const faqs=[['What kinds of projects does NumenX take on?','Embedded systems, FPGA design, firmware, hardware and PCB development, signal processing, ATE, defense electronics and full product engineering, from prototype to production.'],['Do you work with startups as well as large organisations?','Yes. We work with startups, enterprises, research organisations and government agencies, scoping each engagement to the application and reliability requirements.'],['Can you handle a project end to end?','Yes. We deliver architecture, hardware, firmware, FPGA, testing, validation and manufacturing support as a single accountable team.'],['How do we get started?','Send a project inquiry through the contact form with your requirements, budget and timeline. We typically respond within 1 to 2 business days.']];
 
-const sh=['Embedded','FPGA','Firmware','Hardware','PCB','Signal processing','Product','Test equipment','Defense','Validation','Reverse eng.','Consultancy','R&D','Prototypes','Integration'];
+const sh=['Embedded','FPGA','Firmware','Hardware','PCB','DSP','Product','ATE','Defense','Validation','Reverse eng.','Consultancy','R&D','Prototypes','Integration'];
 (function(){
   const cs=document.getElementById('cs'),cl=document.getElementById('cl');
   const land=[[8,28],[19,68],[22,14],[33,44],[36,84],[46,20],[50,62],[61,38],[63,86],[73,14],[76,58],[86,30],[90,80],[56,6],[12,92]];
-  const port=[];{const xl=[16,24,12,28,18,26,14,24],xr=[80,72,86,74,84,70,78];for(let i=0;i<15;i++)port.push([i%2?xr[(i-1)/2]:xl[i/2],5+i*(90/14)])}
+  const port=[];{const xl=[30,34,28,36,31,35,29,33],xr=[70,66,72,64,69,65,71];for(let i=0;i<15;i++)port.push([i%2?xr[(i-1)/2]:xl[i/2],5+i*(90/14)])}
   const edges=[];for(let i=0;i<14;i++)edges.push([i,i+1]);for(let i=0;i<13;i+=2)edges.push([i,i+2]);edges.push([3,7],[7,11],[5,9]);
   const mq=matchMedia('(max-width:700px)');let act=0,nodes=[],lines=[];
   function build(){
     cs.querySelectorAll('.nd').forEach(n=>n.remove());cl.innerHTML='';
     const P=mq.matches?port:land;
     lines=edges.map(e=>{const l=document.createElementNS('http://www.w3.org/2000/svg','line');l.setAttribute('x1',P[e[0]][0]);l.setAttribute('y1',P[e[0]][1]);l.setAttribute('x2',P[e[1]][0]);l.setAttribute('y2',P[e[1]][1]);cl.appendChild(l);return l});
-    nodes=P.map((p,i)=>{const b=document.createElement('button');b.type='button';b.className='nd'+(p[0]>(mq.matches?50:55)?' l':'');b.style.left=p[0]+'%';b.style.top=p[1]+'%';b.setAttribute('aria-label',(i+1)+'. '+services[i][0]);b.innerHTML='<i></i><b>'+sh[i]+'</b>';b.addEventListener('click',()=>set(i));cs.appendChild(b);return b});
+    nodes=P.map((p,i)=>{const b=document.createElement('button');b.type='button';b.className='nd'+((mq.matches?p[0]<50:p[0]>55)?' l':'');b.style.left=p[0]+'%';b.style.top=p[1]+'%';b.setAttribute('aria-label',(i+1)+'. '+services[i][0]);b.style.setProperty('--td',(2.2+(i*37%25)/10)+'s');b.style.setProperty('--dl',(-(i*53%30)/10)+'s');b.innerHTML='<i></i><b>'+sh[i]+'</b>';b.addEventListener('click',()=>set(i));cs.appendChild(b);return b});
     set(act,true)}
   function set(i,quiet){act=(i+15)%15;
     nodes.forEach((n,k)=>{n.classList.toggle('on',k===act);n.setAttribute('aria-pressed',k===act)});
