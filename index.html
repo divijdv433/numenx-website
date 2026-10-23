@@ -307,6 +307,17 @@ main,footer{position:relative;z-index:1}
 .nd i{animation:tw var(--td,3s) ease-in-out var(--dl,0s) infinite}
 .nd.on i,.nd:hover i{animation:none;opacity:1}
 @media(prefers-reduced-motion:reduce){.nd i{animation:none}}
+
+.nd b{left:50%;top:calc(50% + 14px);transform:translateX(-50%)}
+.nd.t b{top:auto;bottom:calc(50% + 14px)}
+.nd.l b{right:auto}
+.cc{position:absolute;transform:translateX(-50%);font:700 11px/1 var(--sans);letter-spacing:.18em;text-transform:uppercase;color:rgba(150,120,255,.75);transition:color .3s;pointer-events:none}
+.cc.on{color:var(--cyan)}
+.cs polyline.flow{fill:none;stroke:rgba(0,229,255,.35);stroke-width:1.2;stroke-dasharray:3 9;vector-effect:non-scaling-stroke;animation:fl 1.6s linear infinite}
+@keyframes fl{to{stroke-dashoffset:-12}}
+@media(prefers-reduced-motion:reduce){.cs polyline.flow{animation:none}}
+.ck{display:block;font:700 11px/1 var(--sans);letter-spacing:.16em;text-transform:uppercase;color:var(--cyan);margin-bottom:10px}
+@media(max-width:700px){.cs{height:520px}}
 </style>
 </head>
 <body>
@@ -357,7 +368,7 @@ main,footer{position:relative;z-index:1}
       <div class="cs" id="cs" role="group" aria-label="Fifteen services, shown as a constellation"><svg id="cl" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true"></svg></div>
       <div class="cp" aria-live="polite">
         <span class="cn" id="cn">01</span>
-        <div class="ct"><h3 id="ch"></h3><p id="cd"></p></div>
+        <div class="ct"><span class="ck" id="ck"></span><h3 id="ch"></h3><p id="cd"></p></div>
         <div class="cb"><button type="button" id="cprev" aria-label="Previous service">&#8592;</button><button type="button" id="cnext" aria-label="Next service">&#8594;</button></div>
       </div>
     </div>
@@ -512,21 +523,37 @@ const faqs=[['What kinds of projects does NumenX take on?','Embedded systems, FP
 const sh=['Embedded','FPGA','Firmware','Hardware','PCB','DSP','Product','ATE','Defense','Validation','Reverse eng.','Consultancy','R&D','Prototypes','Integration'];
 (function(){
   const cs=document.getElementById('cs'),cl=document.getElementById('cl');
-  const land=[[8,28],[19,68],[22,14],[33,44],[36,84],[46,20],[50,62],[61,38],[63,86],[73,14],[76,58],[86,30],[90,80],[56,6],[12,92]];
-  const port=[];{const xl=[30,34,28,36,31,35,29,33],xr=[70,66,72,64,69,65,71];for(let i=0;i<15;i++)port.push([i%2?xr[(i-1)/2]:xl[i/2],5+i*(90/14)])}
-  const edges=[];for(let i=0;i<14;i++)edges.push([i,i+1]);for(let i=0;i<13;i+=2)edges.push([i,i+2]);edges.push([3,7],[7,11],[5,9]);
-  const mq=matchMedia('(max-width:700px)');let act=0,nodes=[],lines=[];
+  const order=[11,12,10, 3,4,1, 0,2,5, 13,9,7, 6,14,8];
+  const groups=['Explore','Design','Build','Prove','Deliver'];
+  const gx=[10,30,50,70,90],gy=[44,52,42,54,44];
+  const tri=[[0,-17],[-6.5,13],[6.5,17]];
+  const land=[],landSide=[];
+  for(let g=0;g<5;g++)for(let j=0;j<3;j++){land.push([gx[g]+tri[j][0],gy[g]+tri[j][1]]);landSide.push(j===0?'t':'')}
+  const port=[];
+  for(let g=0;g<5;g++)for(let j=0;j<3;j++)port.push([[18,50,82][j],12+g*19+[0,5,-2][j]]);
+  const flow=[];for(let g=0;g<5;g++)flow.push(g);
+  const edges=[];
+  for(let g=0;g<5;g++){const k=g*3;edges.push([k,k+1],[k+1,k+2],[k,k+2]);if(g<4)edges.push([k+2,k+3])}
+  const mq=matchMedia('(max-width:700px)');let act=0,nodes=[],lines=[],caps=[];
   function build(){
-    cs.querySelectorAll('.nd').forEach(n=>n.remove());cl.innerHTML='';
-    const P=mq.matches?port:land;
-    lines=edges.map(e=>{const l=document.createElementNS('http://www.w3.org/2000/svg','line');l.setAttribute('x1',P[e[0]][0]);l.setAttribute('y1',P[e[0]][1]);l.setAttribute('x2',P[e[1]][0]);l.setAttribute('y2',P[e[1]][1]);cl.appendChild(l);return l});
-    nodes=P.map((p,i)=>{const b=document.createElement('button');b.type='button';b.className='nd'+((mq.matches?p[0]<50:p[0]>55)?' l':'');b.style.left=p[0]+'%';b.style.top=p[1]+'%';b.setAttribute('aria-label',(i+1)+'. '+services[i][0]);b.style.setProperty('--td',(2.2+(i*37%25)/10)+'s');b.style.setProperty('--dl',(-(i*53%30)/10)+'s');b.innerHTML='<i></i><b>'+sh[i]+'</b>';b.addEventListener('click',()=>set(i));cs.appendChild(b);return b});
-    set(act,true)}
-  function set(i,quiet){act=(i+15)%15;
-    nodes.forEach((n,k)=>{n.classList.toggle('on',k===act);n.setAttribute('aria-pressed',k===act)});
-    lines.forEach((l,k)=>l.classList.toggle('on',edges[k][0]===act||edges[k][1]===act));
+    cs.querySelectorAll('.nd,.cc').forEach(n=>n.remove());cl.innerHTML='';
+    const P=mq.matches?port:land,NS='http://www.w3.org/2000/svg';
+    /* signal flowing through the five groups */
+    const pts=[];for(let g=0;g<5;g++){const k=g*3;pts.push([(P[k][0]+P[k+1][0]+P[k+2][0])/3,(P[k][1]+P[k+1][1]+P[k+2][1])/3])}
+    const pl=document.createElementNS(NS,'polyline');pl.setAttribute('points',pts.map(p=>p.join(',')).join(' '));pl.setAttribute('class','flow');cl.appendChild(pl);
+    lines=edges.map(e=>{const l=document.createElementNS(NS,'line');l.setAttribute('x1',P[e[0]][0]);l.setAttribute('y1',P[e[0]][1]);l.setAttribute('x2',P[e[1]][0]);l.setAttribute('y2',P[e[1]][1]);cl.appendChild(l);return l});
+    nodes=P.map((p,k)=>{const i=order[k],b=document.createElement('button');b.type='button';b.className='nd'+(!mq.matches&&landSide[k]==='t'?' t':'');b.style.left=p[0]+'%';b.style.top=p[1]+'%';b.setAttribute('aria-label',(k+1)+'. '+services[i][0]);b.style.setProperty('--td',(2.2+(k*37%25)/10)+'s');b.style.setProperty('--dl',(-(k*53%30)/10)+'s');b.innerHTML='<i></i><b>'+sh[i]+'</b>';b.addEventListener('click',()=>set(k));cs.appendChild(b);return b});
+    caps=groups.map((n,g)=>{const d=document.createElement('div');d.className='cc';d.textContent=n;
+      if(mq.matches){d.style.left='4%';d.style.top=(12+g*19-9)+'%';d.style.transform='none'}else{d.style.left=gx[g]+'%';d.style.top='86%'}
+      cs.appendChild(d);return d});
+    set(act)}
+  function set(k){act=(k+15)%15;const g=Math.floor(act/3),i=order[act];
+    nodes.forEach((n,j)=>{n.classList.toggle('on',j===act);n.setAttribute('aria-pressed',j===act)});
+    lines.forEach((l,j)=>l.classList.toggle('on',Math.floor(edges[j][0]/3)===g&&Math.floor(edges[j][1]/3)===g));
+    caps.forEach((c,j)=>c.classList.toggle('on',j===g));
     document.getElementById('cn').textContent=String(act+1).padStart(2,'0');
-    document.getElementById('ch').textContent=services[act][0];document.getElementById('cd').textContent=services[act][1]}
+    document.getElementById('ck').textContent=groups[g]+' · step '+(g+1)+' of 5';
+    document.getElementById('ch').textContent=services[i][0];document.getElementById('cd').textContent=services[i][1]}
   document.getElementById('cprev').onclick=()=>set(act-1);document.getElementById('cnext').onclick=()=>set(act+1);
   cs.addEventListener('keydown',e=>{if(e.key==='ArrowRight'||e.key==='ArrowDown'){set(act+1);nodes[act].focus();e.preventDefault()}if(e.key==='ArrowLeft'||e.key==='ArrowUp'){set(act-1);nodes[act].focus();e.preventDefault()}});
   mq.addEventListener?mq.addEventListener('change',build):mq.addListener(build);build();
